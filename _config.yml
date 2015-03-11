@@ -1,6 +1,6 @@
 # Site settings
 title:     		Devmatic
-email:       	bart@devmatic.ca
+email:
 author:      	Bart Jedrocha
 description: 	"Devmatic is the blog and portfolio of Bart Jedrocha"
 baseurl:     	""
@@ -21,7 +21,7 @@ disqus_shortname:
 # Social icons
 show_social_icons: true
 github_username: bjedrocha
-stackoverflow_id: 
+stackoverflow_id: 85125
 twitter_username: bjedrocha
 google_plus_id:
 linkedin_username: bjedrocha
