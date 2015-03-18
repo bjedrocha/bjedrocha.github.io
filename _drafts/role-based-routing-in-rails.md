@@ -1,7 +1,7 @@
 ---
 layout:     post
 title:      Role based routing in Rails
-date:       
+date:       2015-03-18
 summary:    Using advanced routing constraints to control output based on user role
 categories: rails
 ---

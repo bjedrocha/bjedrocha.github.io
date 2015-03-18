@@ -5,7 +5,6 @@ author:      	Bart Jedrocha
 description: 	"Devmatic is the blog and portfolio of Bart Jedrocha"
 baseurl:     	""
 url:         	"http://bjedrocha.github.io"
-# url: 		  	"http://localhost:4000"
 
 # Google analytics
 google_analytics: UA-60630844-1
@@ -16,7 +15,7 @@ show_related_posts: false
 
 # Disqus post comments
 # (leave blank to disable Disqus)
-disqus_shortname:
+disqus_shortname: devmatic
 
 # Social icons
 show_social_icons: true
