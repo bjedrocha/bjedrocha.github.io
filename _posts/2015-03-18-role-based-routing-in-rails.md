@@ -16,7 +16,7 @@ In a recent project, one of the requirements was to provide different output bas
 
 {% endhighlight %}
 
-In some cases, the views would be drastically different depending on user role. To avoid littering my views with logic, I opted to write a small method that would determine which view template to render
+In some cases, the views would be drastically different depending on user role. To avoid littering my views with logic, I decided to create different role-based templates and then wrote a small method that would determine which view template to render
 
 {% highlight ruby %}
 
@@ -74,7 +74,22 @@ end
 
 {% endhighlight %}
 
-The class is very simple, it contains the `matches?` method which looks up the current user and checks to see whether that user is a manager. This worked well for my particular case but I wanted to make it flexible enough to be re-used with other roles. I renamed the file to `role_route_constraint.rb` and modified it slightly
+The class is very simple, it contains the `matches?` method which looks up the current user and checks to see whether that user is a manager. If the user _IS_ a manager, the constraint matches and the route is mapped.
+
+{% highlight ruby %}
+
+Rails.application.routes.draw do
+
+  constraints ManagerRouteConstraint.new do
+    get 'dashboard', to: 'manager_dashboards#show'
+  end
+  get 'dashboard', to: 'operator_dashboards#show'
+
+end
+
+{% endhighlight %}
+
+This worked well for my particular case but I wanted to make it flexible enough to be re-used with other roles. I renamed the file to `role_route_constraint.rb` and modified it slightly
 
 {% highlight ruby %}
 
@@ -112,4 +127,6 @@ end
 
 {% endhighlight %}
 
-With that in place, if a manager requested the `/dashboard` path they would be routed to the _show_ action of the `ManagersController` while operators requesting the same path would be routed to the _show_ action of the `OperatorsController`. The specific controller would then load whatever data was required and present it accordingly. Perfect!
+With that in place, if a manager requested the `/dashboard` path they would be routed to the _show_ action of the `ManagerDashboardsController` while operators requesting the same path would be routed to the _show_ action of the `OperatorDashboardsController`. The specific controller would then load whatever data was required and present it accordingly.
+
+Overall, I'm very happy with this approach. Constraining a route based on user role allows me to map different controllers to a single path and move the deciding logic to the routing layer. Also, because the data being loaded and presented is so different depending on the user requesting it, having it handled by two different controllers is much cleaner.
