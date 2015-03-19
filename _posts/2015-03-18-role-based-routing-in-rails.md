@@ -49,11 +49,84 @@ The above would render `manager_show.html.erb` if the user was a manager or `ope
 
 ### Same route, entirely different content
 
-This is where things got tricky. When logging into the system, users needed to be redirected to `/dashboard` and, depending on their role, would need to see entirely different content. In other words, not only was the presentation different, but also the data being presented.
+This is where things got tricky. When logging into the system, users needed to be redirected to their personal dashboards via a common `/dashboard` path and, depending on their role, would need to see entirely different content. In other words, while the URL to access the dashboard would be the same for all users, the data being loaded and presented would be entirely different and dependant on their user role.
 
-I could have used a single controller and a conditional near the top of my action to determine the content to load, then use my `role_template` method to render the appropriate view. This would work but would result in a fat controller which is something I wanted to avoid. What I really wanted was a way to route the `/dashboard` path to a controller determined by the user role. Enter [Routing Constraints](http://guides.rubyonrails.org/routing.html#advanced-constraints).
+A possible approach would have been to use a single controller with a conditional that determined what data to load and which view template to render
 
-Routing constraints are just that - they allow you to define a constraint that the Rails router should use when matching a route. Constraints can be written using Regex or based on any method on the [Request object](http://guides.rubyonrails.org/action_controller_overview.html#the-request-object) that returns a string. For more complex constraints, you can create a ruby class that responds to `matches?` and then pass an initialization of this class as an argument to the `:constraints` option when defining your route.
+{% highlight ruby %}
+
+# app/controllers/dashboards_controller.rb
+
+# GET /dashboard
+def show
+  if current_user.has_role? :manager
+    manager_dashboard
+  else
+    operator_dashboard
+  end
+end
+
+private
+
+def manager_dashboard
+  # load data required for managers
+  render role_template
+end
+
+def operator_dashboard
+  # load data required for operators
+  render role_template
+end
+
+{% endhighlight %}
+
+All requests for `/dashboard` could then be routed to this single controller
+
+{% highlight ruby %}
+
+# config/routes.rb
+
+Rails.application.routes.draw do
+
+  get 'dashboard', to: 'dashboards#show'
+
+end
+
+{% endhighlight %}
+
+While this would work, the controller would end up fairly fat, especially if I needed to support more roles in the future. What I really wanted was to use multiple controllers and a way to route the `/dashboard` path to a controller determined by the user role. Enter [Routing Constraints](http://guides.rubyonrails.org/routing.html#advanced-constraints).
+
+Routing constraints are just that - they allow you to define a constraint that the Rails router should use when matching a route. Constraints can be written using Regex or based on any method on the [Request object](http://guides.rubyonrails.org/action_controller_overview.html#the-request-object) that returns a string. For example
+
+{% highlight ruby %}
+
+get 'photos', to: 'photos#index',
+  constraints: { subdomain: 'admin' }
+
+{% endhighlight %}
+
+The above constraint would map the `/photos` path to the `PhotosController`'s _index_ action if the requested url contained the _admin_ subdomain (e.g. http://admin.example.com/photos).
+
+For more complex constraints, you can create a ruby class that responds to `matches?` and then pass an initialization of this class as an argument to the `:constraints` option when defining your route
+
+{% highlight ruby %}
+
+class BlacklistConstraint
+  def initialize
+    @ips = Blacklist.retrieve_ips
+  end
+ 
+  def matches?(request)
+    @ips.include?(request.remote_ip)
+  end
+end
+ 
+Rails.application.routes.draw do
+  get '*path', to: 'blacklist#index',
+    constraints: BlacklistConstraint.new
+end
+
+{% endhighlight %}
 
 This is exactly what I was looking for. I created a new folder under `/app` called `constraints` and placed the following into a file called `manager_route_constraint.rb`
 
@@ -74,7 +147,7 @@ end
 
 {% endhighlight %}
 
-The class is very simple, it contains the `matches?` method which looks up the current user and checks to see whether that user is a manager. If the user _IS_ a manager, the constraint matches and the route is mapped.
+The class is very simple, it contains the `matches?` method which looks up the current user (from a session cookie) and checks to see whether that user is a manager. If the user _IS_ a manager, the constraint matches and the route is mapped. If the user _IS NOT_ a manager, the constraint doesn't match and the route is instead mapped to an alternate controller
 
 {% highlight ruby %}
 
@@ -89,7 +162,7 @@ end
 
 {% endhighlight %}
 
-This worked well for my particular case but I wanted to make it flexible enough to be re-used with other roles. I renamed the file to `role_route_constraint.rb` and modified it slightly
+This worked well for my particular case but I wanted to make it flexible enough to be re-used with other roles in the future. I renamed the file to `role_route_constraint.rb` and modified it slightly
 
 {% highlight ruby %}
 
@@ -129,4 +202,4 @@ end
 
 With that in place, if a manager requested the `/dashboard` path they would be routed to the _show_ action of the `ManagerDashboardsController` while operators requesting the same path would be routed to the _show_ action of the `OperatorDashboardsController`. The specific controller would then load whatever data was required and present it accordingly.
 
-Overall, I'm very happy with this approach. Constraining a route based on user role allows me to map different controllers to a single path and move the deciding logic to the routing layer. Also, because the data being loaded and presented is so different depending on the user requesting it, having it handled by two different controllers is much cleaner.
+Overall, I'm very happy with this approach. Constraining a route based on user role allows me to map different controllers to a single path and move the deciding logic to the routing layer. Also, because the data being loaded and presented is so different depending on the user requesting it, having it handled by multiple controllers is much cleaner.
