@@ -1,6 +1,6 @@
 # Site settings
 title:     		Devmatic
-email:
+email: 			bart.jedrocha@gmail.com
 author:      	Bart Jedrocha
 description: 	"Devmatic is the blog and portfolio of Bart Jedrocha"
 baseurl:     	""
