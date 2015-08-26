@@ -4,7 +4,7 @@ email: 			bart.jedrocha@gmail.com
 author:      	Bart Jedrocha
 description: 	"The blog and portfolio of Bart Jedrocha, Software Engineer"
 baseurl:     	""
-url:         	"http://bjedrocha.github.io"
+url:         	"http://bjedrocha.com"
 
 # Google analytics
 google_analytics: UA-60630844-1
