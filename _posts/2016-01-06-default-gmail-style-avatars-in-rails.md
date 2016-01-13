@@ -1,12 +1,12 @@
 ---
 layout: 	post
-title:		Gmail style avatars with avatar_magick
+title:		Default Gmail style avatars in Rails
 date: 		2016-01-06
 summary:	A guide showing how to add Gmail style avatars to a Rails project using the avatar_magick gem.
 categories: rails
 ---
 
-A couple of months ago I released a small [Dragonfly](http://markevans.github.io/dragonfly/) plugin for generating Gmail style avatars called [avatar_magick](https://rubygems.org/gems/avatar_magick). The plugin has a couple of different use cases, the most common of which is being able to generate a default avatar in the event that a user doesn't upload their own. This is a common practice in applications with user accounts and it can be handled in different ways. The simplest and probably most commonly used is some form of the head-shoulders silhoutte.
+A couple of months ago I released a small gem for generating Gmail style avatars called [avatar_magick](https://rubygems.org/gems/avatar_magick). The gem is a plugin for [Dragonfly](http://markevans.github.io/dragonfly/) and has a couple of different use cases, the most common of which is being able to generate a default avatar in the event that a user doesn't upload their own. This is a common practice in applications with user accounts and it can be handled in different ways. The simplest and probably most commonly used is some form of the head-shoulders silhoutte.
 
 ![head-shoulders silhoutte](/images/posts/gmail-style-avatars/default_avatar_silhoutte.png)
 
@@ -52,7 +52,7 @@ To generate the actual avatars, we'll define a custom endpoint to control the si
 # Avatar routes
 get "avatar/:size/:background/:text" => Dragonfly.app.endpoint { |params, app|
   app.generate(:initial_avatar, URI.unescape(params[:text]), { size: params[:size], background_color: params[:background] })
-}
+}, as: :avatar
 {% endhighlight %}
 
 Now, URIs that match the above route will delegate to Dragonfly which in turn will use the `avatar_magick` plugin to generate an initial avatar. For example, visting `http://localhost:3000/avatar/250/d81b60/bart` in development would produce the following avatar
