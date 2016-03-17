@@ -6,6 +6,9 @@ description: 	"The blog and portfolio of Bart Jedrocha, Software Engineer"
 baseurl:     	""
 url:         	"http://bjedrocha.com"
 
+# Gems
+gems: [jekyll-paginate]
+
 # Google analytics
 google_analytics: UA-60630844-1
 
